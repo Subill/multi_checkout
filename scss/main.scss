@@ -1,0 +1,29 @@
+/* mixins */
+@import "_mixins";
+@import "css-icons";
+
+/* variables */
+@import "variables";
+@import "colors";
+@import "text";
+
+/* elements */
+@import "buttons";
+
+/* component */
+@import "_component-forms";
+//@import "_component-tier";
+//@import "_component-forms-offering";
+//@import "_component-embeddables";
+@import "_component-embeddables-checkout";
+
+/* layout components */
+//@import "_layout-nav";
+//@import "_layout-content";
+
+/* servicebot-checkout-embed client -- for this repo project only! */
+@import "_component-servicebot-checkout-embed-client";
+
+img{
+  @include text_muted;
+}

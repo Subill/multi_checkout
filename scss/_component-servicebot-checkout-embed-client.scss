@@ -1,0 +1,320 @@
+@mixin embed-text{
+  font-size: 14px;
+  color: $color-blue;
+}
+@mixin embed-label{
+  @include embed-text;
+  font-weight: 600;
+}
+
+//Test commit
+
+.servicebot--rf-embeddable {
+
+  @include success-ui-default;
+
+  @include embed-text;
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+
+  &.servicebot--request-user-form-wrapper {
+    flex-direction: column;
+    width: 384px;
+    max-width: 100%;
+    margin: $gutter auto;
+  }
+
+  .rf--form-wrapper {
+
+    @include text;
+    @include border;
+    border-radius: 3px;
+    border-color: #0033A0;
+    box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.05);
+    width: 384px;
+    max-width: 100%;
+    justify-content: space-around;
+
+    &.summary-shown {
+
+    }
+
+    .p-20 p {
+      padding: 20px 50px;
+      line-height: 25px;
+      text-align: center;
+    }
+
+    .rf--form {
+
+      .rf--form-heading {
+
+      }
+
+      .rf--form-content {
+
+        .rf--basic-info {
+
+        }
+
+        .divider {
+
+        }
+
+        .rf--form-elements {
+
+          .rf--body {
+
+            form {
+
+              .rf--form-inner {
+
+                ._heading-wrapper {
+                  color: $color-blue;
+                  border-radius: 3px 3px 0 0;
+                  background-color: $color-light-blue-gray;
+                  box-shadow: 0 3px 2px 0 rgba(0, 0, 0, 0.03);
+                  padding: $gutter;
+
+                  h2 {
+                    font-size: 20px;
+                    line-height: 24px;
+                    text-align: center;
+                    margin: 0;
+                    color: #0033A0;
+                    text-transform: none;
+                    letter-spacing: 0.5px;
+                    font-family: "Open Sans", "Arial";
+                  }
+                }
+
+                .rf--summary {
+                  background-color: #FBFCFF;
+                  padding: $gutter $gutter * 2;
+
+                  & > * {
+                    margin: $gutter/2 0;
+                  }
+
+                  h4 {
+                    @include embed-label;
+                    margin: 0;
+                    text-transform: none;
+                    letter-spacing: 0.5px;
+                    font-family: "Open Sans", "Arial";
+                  }
+
+                  h5 {
+                    font-size: 14px;
+                    line-height: 16px;
+                    font-weight: 300;
+                    color: #6F7F9F;
+                    margin: 0;
+                    text-transform: none;
+                    letter-spacing: 0.5px;
+                    font-family: "Open Sans", "Arial";
+                  }
+
+                  .subscription-pricing, .fe--total-price-wrapper {
+                    display: flex;
+                    justify-content: space-between;
+                    margin: $gutter/2 0;
+                  }
+
+                  .fe--base-price-value, .fe--total-price-value {
+                    @include embed-label;
+                    font-size: 16px;
+                    font-weight: normal;
+                  }
+
+                  .fe--total-price-wrapper {
+                    border-top: 1px solid #EBF3F9;
+                    padding: {
+                      top: $gutter;
+                    }
+                    margin: {
+                      top: $gutter;
+                    }
+
+                    .fe--total-price-label h5 {
+                      color: $color-blue;
+                      padding: $gutter/2 0;
+                    }
+
+                    .fe--total-price-value {
+                      padding: $gutter/2 $gutter;
+                      -webkit-border-radius: $gutter;
+                      -moz-border-radius: $gutter;
+                      border-radius: $gutter;
+                      background-color: rgba(76, 130, 252, 0.1);
+                    }
+                  }
+
+                }
+
+                ._content_wrapper {
+                  padding: $gutter * 2;
+                  background: white;
+                }
+
+                &._step-0 {
+
+                }
+
+                &._step-1 {
+
+                  ._content_wrapper {
+                    padding: $gutter $gutter*2;
+                  }
+                }
+
+              }
+
+              .sb-form-group {
+
+                label {
+                  @include embed-label;
+                  text-transform: none;
+                }
+
+                .form-input-flex {
+                  display: flex;
+                  flex-direction: column;
+
+                  input {
+                    font-size: 14px;
+                    color: $color-blue;
+                    height: $gutter * 2;
+                    width: 100%;
+                    margin: {
+                      top: $gutter / 2;
+                      bottom: $gutter;
+                    };
+                    padding: {
+                      left: $gutter;
+                      right: $gutter;
+                    }
+
+                    &.form-control {
+
+                      &.has-error {
+                        margin: {
+                          bottom: 0;
+                        }
+                        border-color: $color-error;
+
+                      }
+
+                    }
+                  }
+
+                  .form-error {
+                    margin: {
+                      bottom: $gutter / 2;
+                    }
+                  }
+
+                }
+
+              }
+
+              button {
+
+                &.buttons {
+                  font-size: 14px;
+                  font-weight: 600;
+                  padding: 10px $gutter * 2;
+                  background: $color-blue;
+                }
+
+                &._text {
+                  font-weight: normal;
+                  color: $color-blue !important;
+                  position: absolute;
+                  left: 0;
+                  font-size: 0.9em;
+                }
+
+              }
+
+            }
+
+          }
+
+        }
+
+      }
+
+    }
+
+  }
+
+  .sb-form-group {
+
+    * {
+      box-sizing: border-box;
+    }
+
+    .form-error {
+      flex-basis: 100%;
+      line-height: 29px;
+      display: block;
+      background: #ff2e2e;
+      color: white;
+      padding: 0 10px;
+      border-bottom-left-radius: 3px;
+      border-bottom-right-radius: 3px;
+    }
+  }
+
+  .button-wrapper{
+
+    .buttons{
+
+      &._next{
+        margin-top: $gutter;
+      }
+
+    }
+
+  }
+
+  #card-element{
+    padding: $gutter 0 $gutter*4;
+
+    h5{
+      margin: $gutter/2 0;
+      @include embed-label;
+    }
+
+    .StripeElement{
+      @include border;
+      padding: $gutter/3 $gutter/2;
+      box-shadow: none;
+
+      & > *{
+        color: #9B9B9B;
+      }
+
+      .ElementsApp{
+
+        .InputElement{
+          color: black;
+        }
+      }
+    }
+
+  }
+}
+
+.servicebot-logo-footer{
+  font-family: "Open Sans", "Arial";
+  font-size: 10px;
+  text-align: right;
+  color: $color-light-grey;
+  padding: $gutter/2 0;
+}
+
+@include google-login;
