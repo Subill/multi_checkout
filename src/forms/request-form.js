@@ -342,7 +342,6 @@ class ServiceRequestForm extends React.Component {
                                                     reference={this.getReference()}
                                                     email={formJSON.email}
                                                     amount={5000}
-                                                    plan={plan.payment_plan.data.plan_code}
                                                     //paystackkey="pk_test_de3c711fe1b315fae17ab54ec6204d1f641e240a"
                                                     paystackkey={spk}
                                 />}

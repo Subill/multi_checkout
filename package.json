@@ -1,6 +1,6 @@
 {
   "name": "multi-checkout",
-  "version": "0.2.110",
+  "version": "0.2.111",
   "dependencies": {
     "babel-plugin-add-module-exports": "^1.0.0",
     "currency-symbol-map": "^4.0.4",
