@@ -5,7 +5,7 @@ import React from 'react';
  * Since Stripe takes amount in cents, we want to convert it and display dollar value.
  */
 function getPriceValue(value){
-    return `$${(value/100).toFixed(2)}`;
+    return `$${(value).toFixed(2)}`;
 }
 
 function formatMoney(price, c, d, t){
@@ -23,7 +23,7 @@ let Price = function(props){
     let formatter = new Intl.NumberFormat("en-US", { style: 'currency', currency: props.currency }).format;
 
     return(
-        <span>{formatter(Number(props.value/100))}</span>
+        <span>{formatter(Number(props.value))}</span>
     );
 };
 

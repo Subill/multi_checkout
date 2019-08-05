@@ -1,6 +1,6 @@
 {
   "name": "multi-checkout",
-  "version": "0.2.111",
+  "version": "0.2.114",
   "dependencies": {
     "babel-plugin-add-module-exports": "^1.0.0",
     "currency-symbol-map": "^4.0.4",
@@ -13,6 +13,7 @@
     "react-hot-loader": "^4.0.1",
     "react-number-format": "^3.4.2",
     "react-paystack": "^2.0.2",
+    "react-ravepayment": "^2.0.8",
     "react-redux": "^5.0.7",
     "react-s-alert": "^1.4.1",
     "react-scripts": "1.1.4",
@@ -27,7 +28,7 @@
   "main": "./src/index.js",
   "scripts": {
     "start": "./node_modules/.bin/webpack-dev-server",
-    "build": "./node_modules/.bin/webpack",
+    "build": "./node_modules/.bin/babel src --out-dir dist",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject"
   },
@@ -48,7 +49,7 @@
     "node-sass": "^4.9.0",
     "sass-loader": "^7.0.3",
     "webpack": "^4.12.1",
-    "webpack-cli": "^3.1.1",
+    "webpack-cli": "^3.3.5",
     "webpack-dev-server": "^3.1.1"
   }
 }

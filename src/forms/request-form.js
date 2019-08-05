@@ -17,7 +17,7 @@ import {CardSection} from "./billing-settings-form.js";
 
 import {Price} from "../utilities/price.js";
 import {required, email, numericality, length, confirmation} from 'redux-form-validators'
-import PaystackButton from 'react-paystack';
+import RavePaymentModal from 'react-ravepayment';
 import getWidgets from "../core-input-types/client";
 let _ = require("lodash");
 import {getPrice} from "../widget-inputs/handleInputs";
@@ -104,10 +104,12 @@ class ServiceRequestForm extends React.Component {
         }
 
         this.getSPK = this.getSPK.bind(this);
+        this.getCurrency = this.getCurrency.bind(this);
     }
 
     componentDidMount() {
-        this.getSPK()
+        this.getSPK();
+        this.getCurrency();
     }
 
     componentDidUpdate(prevProps, prevState){
@@ -182,7 +184,7 @@ class ServiceRequestForm extends React.Component {
 
     getReference() {
         //you can put any unique reference implementation code here
-        let text = "verify";
+        let text = "";
         let possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-.=";
 
         for( let i=0; i < 10; i++ )
@@ -194,13 +196,6 @@ class ServiceRequestForm extends React.Component {
     getSPK(){
         let self = this;
         let tid = self.state.tid;
-        /**Fetcher(self.state.pub_key).then(function (response) {
-            if(!response.error){
-                self.setState({loading: false, spk: response.spk});
-            }else{
-                self.setState({loading: false});
-            }
-        });**/
         fetch(`${this.props.url}/api/v1/stripe/spk/${tid}`).then(function(response) {
                 return response.json()
             }).then(function(json) {
@@ -208,10 +203,20 @@ class ServiceRequestForm extends React.Component {
         }).catch(e => console.error(e));
     }
 
+    getCurrency(){
+        let self = this;
+        fetch(`${this.props.url}/api/v1/tenant-system-options`).then(function(response) {
+                return response.json()
+            }).then(function(json) {
+            self.setState({currency : json.currency});
+        }).catch(e => console.error(e));
+    };
+
     render() {
         const {handleSubmit, formJSON, emailOverride,token, googleClientId, googleScope, helpers, error, step, plan, needsCard, setGoogleInformation, accessType} = this.props;
         const {price} = this.state;
         let spk = this.state.spk;
+        let currency = this.state.currency;
 
         let getAlerts = ()=>{
             if(this.state.alerts){
@@ -331,19 +336,21 @@ class ServiceRequestForm extends React.Component {
                             {this.props.summary}
                             <div className="_content_wrapper">
                             {getAlerts()}
-                                {needsCard && <PaystackButton
+                                {needsCard && <RavePaymentModal
                                                     text={getRequestText()}
                                                     class="buttons _primary submit-request"
                                                     //className="btn btn-default btn-rounded btn-md m-r-5 application-launcher"
                                                     callback={this.callback}
                                                     close={this.close}
-                                                    disabled={false}
-                                                    embed={true}
                                                     reference={this.getReference()}
                                                     email={formJSON.email}
-                                                    amount={5000}
+                                                    currency={currency}
+                                                    amount={1}
+                                                    payment_method="card"
                                                     //paystackkey="pk_test_de3c711fe1b315fae17ab54ec6204d1f641e240a"
-                                                    paystackkey={spk}
+                                                    ravePubKey={spk}
+                                                    isProduction= {false}
+                                                    tag= "button"
                                 />}
                                 <div className="button-wrapper _center _space-between">
                                     {!this.props.skippedStep0 && <button onClick={helpers.stepBack} className="buttons _primary _text submit-request">
