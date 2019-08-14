@@ -98,18 +98,16 @@ class ServiceRequestForm extends React.Component {
             price: props.plan.amount,
             tid: props.plan.t_id,
             loading: true,
-            alerts: null
+            alerts: null,
             //pub_key: props.url + "/api/v1/stripe/spk"
-            //spk: null
+            spk: ''
         }
 
         this.getSPK = this.getSPK.bind(this);
-        this.getCurrency = this.getCurrency.bind(this);
     }
 
     componentDidMount() {
         this.getSPK();
-        this.getCurrency();
     }
 
     componentDidUpdate(prevProps, prevState){
@@ -203,14 +201,18 @@ class ServiceRequestForm extends React.Component {
         }).catch(e => console.error(e));
     }
 
-    getCurrency(){
+    getLiveMode(){
         let self = this;
-        fetch(`${this.props.url}/api/v1/tenant-system-options`).then(function(response) {
-                return response.json()
-            }).then(function(json) {
-            self.setState({currency : json.currency});
-        }).catch(e => console.error(e));
-    };
+        if(this.state.spk !== '') {
+            let pk = self.state.spk;
+            let livemode = pk ? pk.substring(9, 12) : "";
+            if (livemode.toUpperCase() === "TEST") {
+                return false;
+            } else {
+                return true;
+            }
+        }
+    }
 
     render() {
         const {handleSubmit, formJSON, emailOverride,token, googleClientId, googleScope, helpers, error, step, plan, needsCard, setGoogleInformation, accessType} = this.props;
@@ -344,12 +346,12 @@ class ServiceRequestForm extends React.Component {
                                                     close={this.close}
                                                     reference={this.getReference()}
                                                     email={formJSON.email}
-                                                    currency={currency}
+                                                    currency={plan.currency}
                                                     amount={1}
                                                     payment_method="card"
                                                     //paystackkey="pk_test_de3c711fe1b315fae17ab54ec6204d1f641e240a"
                                                     ravePubKey={spk}
-                                                    isProduction= {false}
+                                                    isProduction= {this.getLiveMode()}
                                                     tag= "button"
                                 />}
                                 <div className="button-wrapper _center _space-between">
@@ -412,7 +414,6 @@ class ServiceInstanceForm extends React.Component {
             templateData: this.props.service,
             formData: this.props.service,
             formURL: this.props.url + "/api/v1/service-templates/" + templateId + "/request",
-            formiURL: this.props.url + "/api/v1/service-templates/" + templateId + "/manrequest",
             formResponseData: null,
             formResponseError: null,
             serviceCreated: false,

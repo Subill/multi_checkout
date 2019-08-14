@@ -1,6 +1,6 @@
 {
   "name": "multi-checkout",
-  "version": "0.2.114",
+  "version": "0.2.115",
   "dependencies": {
     "babel-plugin-add-module-exports": "^1.0.0",
     "currency-symbol-map": "^4.0.4",
@@ -50,6 +50,6 @@
     "sass-loader": "^7.0.3",
     "webpack": "^4.12.1",
     "webpack-cli": "^3.3.5",
-    "webpack-dev-server": "^3.1.1"
+    "webpack-dev-server": "^3.7.2"
   }
 }
