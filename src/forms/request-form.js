@@ -167,7 +167,7 @@ class ServiceRequestForm extends React.Component {
             this.setState({ alerts: {
                 type: 'success',
                 icon: 'check',
-                message: 'Request Successful.'
+                message: 'Request Successful, Verify Your Email.'
             }});
         }
         else {
