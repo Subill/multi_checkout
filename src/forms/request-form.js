@@ -598,7 +598,7 @@ class ServiceInstanceForm extends React.Component {
             };
         //}
         
-        let successMessage = this.props.message || 'Request Successful';
+        let successMessage = this.props.message || 'Request Successful, Verify Your Email';
         helpers.updatePrice = self.updatePrice;
         helpers.stepForward = this.props.stepForward;
         helpers.stepBack = this.props.stepBack;
