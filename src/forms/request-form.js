@@ -94,20 +94,24 @@ class ServiceRequestForm extends React.Component {
 
     constructor(props) {
         super(props);
+        //let {currency} = this.props;
         this.state = {
             price: props.plan.amount,
             tid: props.plan.t_id,
             loading: true,
             alerts: null,
+            currency: props.currency,
             //pub_key: props.url + "/api/v1/stripe/spk"
             spk: ''
         }
 
         this.getSPK = this.getSPK.bind(this);
+        this.getService = this.getService.bind(this);
     }
 
     componentDidMount() {
         this.getSPK();
+        this.getService();
     }
 
     componentDidUpdate(prevProps, prevState){
@@ -201,6 +205,58 @@ class ServiceRequestForm extends React.Component {
         }).catch(e => console.error(e));
     }
 
+    getService() {
+        let self = this;
+        let headers = new Headers({
+            "Content-Type": "application/json"
+        });
+        let req = {
+                method: "GET",
+                headers: headers,
+
+        };
+        Fetcher(`${self.props.url}/api/v1/service-templates/${this.state.id}/request`, "GET", null, req).then(function (response) {
+            if (!response.error) {
+                let propertyOverrides = self.props.propertyOverrides;
+                let propertyDefaults = self.props.propertyDefaults;
+                response.payment_structure_template_id = self.props.paymentStructureTemplateId;
+                if(propertyOverrides) {
+                    response.references.service_template_properties = response.references.service_template_properties.map(prop => {
+                        if (propertyOverrides[prop.name]){
+                            prop.prompt_user = false;
+                            prop.private = true;
+                            prop.data = {value : propertyOverrides[prop.name]};
+                        }
+                        return prop;
+                    })
+                }
+                if(propertyDefaults){
+                    if(propertyDefaults.email){
+                        response.email = propertyDefaults.email;
+                    }
+                    response.references.service_template_properties = response.references.service_template_properties.map(prop => {
+                        if (propertyDefaults[prop.name]){
+                            // prop.prompt_user = false;
+                            // prop.private = true;
+                            prop.data = {value : propertyDefaults[prop.name]};
+                        }
+                        return prop;
+                    })
+                }
+
+                self.setState({service: response});
+            } else {
+                if(response.error === "Unauthenticated"){
+                    self.setState({error : "Error: Trying to request unpublished template"});
+                }
+                console.error("Error getting template request data", response);
+            }
+            self.setState({loading: false});
+            self.props.setLoading(false);
+
+        });
+    }
+
     getLiveMode(){
         let self = this;
         if(this.state.spk !== '') {
@@ -215,164 +271,166 @@ class ServiceRequestForm extends React.Component {
     }
 
     render() {
-        const {handleSubmit, formJSON, emailOverride,token, googleClientId, googleScope, helpers, error, step, plan, needsCard, setGoogleInformation, accessType} = this.props;
+        const {handleSubmit, formJSON, emailOverride,token, googleClientId, googleScope, helpers, error, step, currency, plan, needsCard, setGoogleInformation, accessType} = this.props;
         const {price} = this.state;
         let spk = this.state.spk;
-        let currency = this.state.currency;
-
-        let getAlerts = ()=>{
-            if(this.state.alerts){
-                return ( <Alerts type={this.state.alerts.type} message={this.state.alerts.message}
-                                 position={{position: 'fixed', bottom: true}} icon={this.state.alerts.icon} /> );
-            }
-        };
-
-        let offlineJSON = {}
-        if(accessType === "offline"){
-            offlineJSON = {
-                accessType,
-                responseType:"code",
-                prompt: "consent"
-            }
-        }
-        let getRequestText = () => {
-            let serType = plan.type;
-            let trial = plan.trial_period_days > 0;
-            if(trial){
-                return ("Sign Up")
-            }
-            else {
-                if (serType === "subscription") {
-                    return ( <span>Subscribe Now</span> );
-                } else if (serType === "one_time") {
-                    return ( <span>Pay Now</span> );
-                } else if (serType === "custom") {
-                    return ( <span>Request</span> );
-                } else if (serType === "split") {
-                    return ( <span>Pay Now</span> );
-                } else {
-                    return (<span>Pay Now</span>)
+        //alert(`Currency: ${currency}`);
+        //let currency = this.state.currency;
+        //if(!currency) {
+            let getAlerts = ()=>{
+                if(this.state.alerts){
+                    return ( <Alerts type={this.state.alerts.type} message={this.state.alerts.message}
+                                     position={{position: 'fixed', bottom: true}} icon={this.state.alerts.icon} /> );
+                }
+            };
+    
+            let offlineJSON = {}
+            if(accessType === "offline"){
+                offlineJSON = {
+                    accessType,
+                    responseType:"code",
+                    prompt: "consent"
                 }
             }
-        };
-
-        let buttonText =  plan && plan.type !== "custom" ? "Next"  : "Contact";
-        let checkoutText = plan && plan.trial_period_days > 0 ? "Sign Up" : "Pay Now";
-        //Sort users and if user does not have name set, set it to the email value which will always be there
-        const responseGoogle = (response) => {
-            if(!response.error) {
-                setGoogleInformation(response)
+            let getRequestText = () => {
+                let serType = plan.type;
+                let trial = plan.trial_period_days > 0;
+                if(trial){
+                    return ("Sign Up")
+                }
+                else {
+                    if (serType === "subscription") {
+                        return ( <span>Subscribe Now</span> );
+                    } else if (serType === "one_time") {
+                        return ( <span>Pay Now</span> );
+                    } else if (serType === "custom") {
+                        return ( <span>Request</span> );
+                    } else if (serType === "split") {
+                        return ( <span>Pay Now</span> );
+                    } else {
+                        return (<span>Pay Now</span>)
+                    }
+                }
+            };
+    
+            let buttonText =  plan && plan.type !== "custom" ? "Next"  : "Contact";
+            let checkoutText = plan && plan.trial_period_days > 0 ? "Sign Up" : "Pay Now";
+            //Sort users and if user does not have name set, set it to the email value which will always be there
+            const responseGoogle = (response) => {
+                if(!response.error) {
+                    setGoogleInformation(response)
+                }
+    
             }
-
-        }
-
-        return (
-            <div className="rf--body">
-                <form onSubmit={handleSubmit}>
-                    {step === 0 &&
-                    <div>
-                        {!helpers.uid &&
-                        <div className="rf--form-inner _step-0">
-                            <div className="_heading-wrapper"><h2>{plan.type === "custom" ? "Contact" : "Sign Up"}</h2></div>
-                            <div className="_content_wrapper">
-                                {accessType !== "offline" && <React.Fragment>
-                                    {helpers.setName && !formJSON.token && !token && <Field name="userName" type="text" component={inputField} validate={[required()]}/>}
-                                    {!emailOverride && !formJSON.token && !token && <Field name="email" type="text" component={inputField}
-                                           label="Email Address" validate={[required(), email()]}/>}
-
-                                    {helpers.emailExists && "That email is in use"}
-                                    {helpers.setPassword && plan.type !== "custom" && !formJSON.token && !token && <div>
-                                        <Field name="password" type="password" component={inputField} label="Password" validate={[length({min: 8}), required()]}/>
-                                        <Field name="password_confirmation" type="password" label="Password confirmation" component={inputField}
-                                               validate={[confirmation({ field: 'password', fieldLabel: 'Password' })]} />
-
+    
+            return (
+                <div className="rf--body">
+                    <form onSubmit={handleSubmit}>
+                        {step === 0 &&
+                        <div>
+                            {!helpers.uid &&
+                            <div className="rf--form-inner _step-0">
+                                <div className="_heading-wrapper"><h2>{plan.type === "custom" ? "Contact" : "Sign Up"}</h2></div>
+                                <div className="_content_wrapper">
+                                    {accessType !== "offline" && <React.Fragment>
+                                        {helpers.setName && !formJSON.token && !token && <Field name="userName" type="text" component={inputField} validate={[required()]}/>}
+                                        {!emailOverride && !formJSON.token && !token && <Field name="email" type="text" component={inputField}
+                                               label="Email Address" validate={[required(), email()]}/>}
+    
+                                        {helpers.emailExists && "That email is in use"}
+                                        {helpers.setPassword && plan.type !== "custom" && !formJSON.token && !token && <div>
+                                            <Field name="password" type="password" component={inputField} label="Password" validate={[length({min: 8}), required()]}/>
+                                            <Field name="password_confirmation" type="password" label="Password confirmation" component={inputField}
+                                                   validate={[confirmation({ field: 'password', fieldLabel: 'Password' })]} />
+    
+                                        </div>}
+                                        {/*plan.type !== "custom" && plan.pricing_model === "per_unit" && <div>
+                                            <Field name="no_of_units" type="number" component={inputField} label="No Of Units" validate={[required()]}/>
+    
+                            </div>*/}
+                                    </React.Fragment>}
+    
+                                    <FormSection name="references">
+                                        <FieldArray name="service_template_properties" component={renderCustomProperty}
+                                                    currency={currency}
+                                                    formJSON={formJSON.references.service_template_properties}/>
+                                    </FormSection>
+    
+                                    <div className="button-wrapper _center">
+                                        <button className="buttons _primary _next">
+                                            {buttonText}
+                                        </button>
+                                    </div>
+    
+                                    {googleClientId && googleClientId.value && googleClientId.value.length > 0 && plan.type !== "custom" && !formJSON.token && !token && <div className={`google-login-container`}>
+                                        {accessType !== "offline" && <span className={`_divider`}>Or</span>}
+                                        <GoogleLogin
+                                            disabledStyle={{}}
+                                            className="google-button"
+                                            clientId={googleClientId.value}
+                                            buttonText="Sign up with Google"
+                                            onSuccess={responseGoogle}
+                                            onFailure={responseGoogle}
+                                            scope={googleScope || "profile email"}
+                                            {...offlineJSON}
+                                        >
+                                            <span className="google-button__icon">
+                        <img src='data:image/svg+xml;utf8,<svg viewBox="0 0 366 372" xmlns="http://www.w3.org/2000/svg"><path d="M125.9 10.2c40.2-13.9 85.3-13.6 125.3 1.1 22.2 8.2 42.5 21 59.9 37.1-5.8 6.3-12.1 12.2-18.1 18.3l-34.2 34.2c-11.3-10.8-25.1-19-40.1-23.6-17.6-5.3-36.6-6.1-54.6-2.2-21 4.5-40.5 15.5-55.6 30.9-12.2 12.3-21.4 27.5-27 43.9-20.3-15.8-40.6-31.5-61-47.3 21.5-43 60.1-76.9 105.4-92.4z" id="Shape" fill="#EA4335"/><path d="M20.6 102.4c20.3 15.8 40.6 31.5 61 47.3-8 23.3-8 49.2 0 72.4-20.3 15.8-40.6 31.6-60.9 47.3C1.9 232.7-3.8 189.6 4.4 149.2c3.3-16.2 8.7-32 16.2-46.8z" id="Shape" fill="#FBBC05"/><path d="M361.7 151.1c5.8 32.7 4.5 66.8-4.7 98.8-8.5 29.3-24.6 56.5-47.1 77.2l-59.1-45.9c19.5-13.1 33.3-34.3 37.2-57.5H186.6c.1-24.2.1-48.4.1-72.6h175z" id="Shape" fill="#4285F4"/><path d="M81.4 222.2c7.8 22.9 22.8 43.2 42.6 57.1 12.4 8.7 26.6 14.9 41.4 17.9 14.6 3 29.7 2.6 44.4.1 14.6-2.6 28.7-7.9 41-16.2l59.1 45.9c-21.3 19.7-48 33.1-76.2 39.6-31.2 7.1-64.2 7.3-95.2-1-24.6-6.5-47.7-18.2-67.6-34.1-20.9-16.6-38.3-38-50.4-62 20.3-15.7 40.6-31.5 60.9-47.3z" fill="#34A853"/></svg>'/>
+                    </span>
+                                            <span className="google-button__text">Sign up with Google</span>
+                                        </GoogleLogin>
+    
+    
                                     </div>}
-                                    {/*plan.type !== "custom" && plan.pricing_model === "per_unit" && <div>
-                                        <Field name="no_of_units" type="number" component={inputField} label="No Of Units" validate={[required()]}/>
-
-                        </div>*/}
-                                </React.Fragment>}
-
-                                <FormSection name="references">
-                                    <FieldArray name="service_template_properties" component={renderCustomProperty}
-                                                currency={plan.currency}
-                                                formJSON={formJSON.references.service_template_properties}/>
-                                </FormSection>
-
-                                <div className="button-wrapper _center">
-                                    <button className="buttons _primary _next">
-                                        {buttonText}
-                                    </button>
                                 </div>
-
-                                {googleClientId && googleClientId.value && googleClientId.value.length > 0 && plan.type !== "custom" && !formJSON.token && !token && <div className={`google-login-container`}>
-                                    {accessType !== "offline" && <span className={`_divider`}>Or</span>}
-                                    <GoogleLogin
-                                        disabledStyle={{}}
-                                        className="google-button"
-                                        clientId={googleClientId.value}
-                                        buttonText="Sign up with Google"
-                                        onSuccess={responseGoogle}
-                                        onFailure={responseGoogle}
-                                        scope={googleScope || "profile email"}
-                                        {...offlineJSON}
-                                    >
-                                        <span className="google-button__icon">
-                    <img src='data:image/svg+xml;utf8,<svg viewBox="0 0 366 372" xmlns="http://www.w3.org/2000/svg"><path d="M125.9 10.2c40.2-13.9 85.3-13.6 125.3 1.1 22.2 8.2 42.5 21 59.9 37.1-5.8 6.3-12.1 12.2-18.1 18.3l-34.2 34.2c-11.3-10.8-25.1-19-40.1-23.6-17.6-5.3-36.6-6.1-54.6-2.2-21 4.5-40.5 15.5-55.6 30.9-12.2 12.3-21.4 27.5-27 43.9-20.3-15.8-40.6-31.5-61-47.3 21.5-43 60.1-76.9 105.4-92.4z" id="Shape" fill="#EA4335"/><path d="M20.6 102.4c20.3 15.8 40.6 31.5 61 47.3-8 23.3-8 49.2 0 72.4-20.3 15.8-40.6 31.6-60.9 47.3C1.9 232.7-3.8 189.6 4.4 149.2c3.3-16.2 8.7-32 16.2-46.8z" id="Shape" fill="#FBBC05"/><path d="M361.7 151.1c5.8 32.7 4.5 66.8-4.7 98.8-8.5 29.3-24.6 56.5-47.1 77.2l-59.1-45.9c19.5-13.1 33.3-34.3 37.2-57.5H186.6c.1-24.2.1-48.4.1-72.6h175z" id="Shape" fill="#4285F4"/><path d="M81.4 222.2c7.8 22.9 22.8 43.2 42.6 57.1 12.4 8.7 26.6 14.9 41.4 17.9 14.6 3 29.7 2.6 44.4.1 14.6-2.6 28.7-7.9 41-16.2l59.1 45.9c-21.3 19.7-48 33.1-76.2 39.6-31.2 7.1-64.2 7.3-95.2-1-24.6-6.5-47.7-18.2-67.6-34.1-20.9-16.6-38.3-38-50.4-62 20.3-15.7 40.6-31.5 60.9-47.3z" fill="#34A853"/></svg>'/>
-                </span>
-                                        <span className="google-button__text">Sign up with Google</span>
-                                    </GoogleLogin>
-
-
-                                </div>}
                             </div>
+                            }
                         </div>
+                        //end step 0
                         }
-                    </div>
-                    //end step 0
-                    }
-
-                    {step === 1 &&
-                        <div className="rf--form-inner _step-1">
-                            <div className="_heading-wrapper"><h2>Checkout</h2></div>
-                            {this.props.summary}
-                            <div className="_content_wrapper">
-                            {getAlerts()}
-                                {needsCard && <RavePaymentModal
-                                                    text={getRequestText()}
-                                                    class="buttons _primary submit-request"
-                                                    //className="btn btn-default btn-rounded btn-md m-r-5 application-launcher"
-                                                    callback={this.callback}
-                                                    close={this.close}
-                                                    reference={this.getReference()}
-                                                    email={formJSON.email}
-                                                    currency={plan.currency}
-                                                    amount={1}
-                                                    payment_method="card"
-                                                    //paystackkey="pk_test_de3c711fe1b315fae17ab54ec6204d1f641e240a"
-                                                    ravePubKey={spk}
-                                                    isProduction= {this.getLiveMode()}
-                                                    tag= "button"
-                                />}
-                                <div className="button-wrapper _center _space-between">
-                                    {!this.props.skippedStep0 && <button onClick={helpers.stepBack} className="buttons _primary _text submit-request">
-                                        Back
-                                    </button>}
-
-                                    {!needsCard && <button className="buttons _primary submit-request" type="submit" value="submit">
-                                        {getRequestText()}
-                                    </button>}
+    
+                        {step === 1 &&
+                            <div className="rf--form-inner _step-1">
+                                <div className="_heading-wrapper"><h2>Checkout</h2></div>
+                                {this.props.summary}
+                                <div className="_content_wrapper">
+                                {getAlerts()}
+                                    {needsCard && <RavePaymentModal
+                                                        text={getRequestText()}
+                                                        class='buttons _primary submit-request'
+                                                        //className="btn btn-default btn-rounded btn-md m-r-5 application-launcher"
+                                                        callback={this.callback}
+                                                        close={this.close}
+                                                        reference={this.getReference()}
+                                                        email={formJSON.email}
+                                                        currency={currency}
+                                                        amount={1}
+                                                        payment_method='card'
+                                                        //paystackkey="pk_test_de3c711fe1b315fae17ab54ec6204d1f641e240a"
+                                                        ravePubKey={spk}
+                                                        isProduction= {this.getLiveMode()}
+                                                        tag= 'button'
+                                    />}
+                                    <div className="button-wrapper _center _space-between">
+                                        {!this.props.skippedStep0 && <button onClick={helpers.stepBack} className="buttons _primary _text submit-request">
+                                            Back
+                                        </button>}
+    
+                                        {!needsCard && <button className="buttons _primary submit-request" type="submit" value="submit">
+                                            {getRequestText()}
+                                        </button>}
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    }
-                    {error &&
-                    <strong>
-                        {error}
-                    </strong>}
-                </form>
-            </div>
-        )
+                        }
+                        {error &&
+                        <strong>
+                            {error}
+                        </strong>}
+                    </form>
+                </div>
+            )
+        //}
     };
 }
 
@@ -632,7 +690,7 @@ class ServiceInstanceForm extends React.Component {
                     handleFailure={this.handleFailure}
                     formName="serviceInstanceRequestForm"
                     helpers={helpers}
-                    formProps={{googleScope: this.props.googleScope, skippedStep0: this.state.skippedStep0, token: this.props.token, funds: this.state.funds, googleClientId: this.state.googleClientId, emailOverride: this.props.email, needsCard, summary: this.props.summary, plan: this.props.plan, step : this.props.step, url : this.props.url}}
+                    formProps={{googleScope: this.props.googleScope, skippedStep0: this.state.skippedStep0, token: this.props.token, funds: this.state.funds, googleClientId: this.state.googleClientId, emailOverride: this.props.email, needsCard, summary: this.props.summary, plan: this.props.plan, step : this.props.step, url : this.props.url, currency : this.props.service.currency}}
                     validations={this.formValidation}
                     loaderTimeout={false}
                     external={this.props.external}

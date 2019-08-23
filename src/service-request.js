@@ -32,7 +32,7 @@ function Summary(props){
                                     {(pricingPlan.type === "one_time") ? (
                                         <div className="fe--base-price"><h5>Base Cost</h5></div>) : null}
                                     <div className="fe--base-price-value">
-                                        {getPrice(pricingPlan, null, metricProp)}
+                                        {getPrice(pricingPlan, null, metricProp, currency)}
                                     </div>
                                 </div>
                             </div>
@@ -217,6 +217,7 @@ class ServiceRequest extends React.Component {
             let {formJSON, options, paymentStructureTemplateId, googleScope} = this.props;
             let {service, error} = this.state;
             let selectedTier = null;
+            let currency = service.currency;
             let pricingPlan = service.references.tiers.reduce((acc, tier) => {
                let plan = tier.references.payment_structure_templates.find(p => p.id == paymentStructureTemplateId);
                if(plan){
@@ -241,7 +242,7 @@ class ServiceRequest extends React.Component {
                         <div
                             className="fe--line-item">{lineItem.prop_label}</div>
                         <div className="fe--line-item-price-value">
-                            {this.getAdjustmentSign(lineItem, pricingPlan.currency)}
+                            {this.getAdjustmentSign(lineItem, currency)}
                         </div>
                     </div>
                 </div>
@@ -284,7 +285,7 @@ class ServiceRequest extends React.Component {
                             <div className="rf--form-content">
                                 <div className="rf--basic-info">
                                 </div>
-                                <ServiceRequestForm summary={(<Summary {...summaryProps} currency={pricingPlan.currency} metricProp={isMetric && metricProp}/>)} plan={pricingPlan} {...this.props} step={this.state.step} stepForward={this.stepForward} stepBack={this.stepBack} service={service}/>
+                                <ServiceRequestForm summary={(<Summary {...summaryProps} currency={service.currency} metricProp={isMetric && metricProp}/>)} plan={pricingPlan} {...this.props} step={this.state.step} stepForward={this.stepForward} stepBack={this.stepBack} service={service}/>
                             </div>
                         </div>
                     </div>

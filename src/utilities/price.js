@@ -27,23 +27,23 @@ let Price = function(props){
     );
 };
 
-let getPrice = (myService, serviceType = null, metricProp)=>{
+let getPrice = (myService, serviceType = null, metricProp, currency)=>{
     let metricName = metricProp && metricProp.config.unit;
     let serType = myService.type || serviceType;
 
     if (serType === "subscription"){
         return (
             <span>
-                <Price value={myService.amount} currency={myService.currency}/>
+                <Price value={myService.amount} currency={currency}/>
                 <span>{myService.interval_count === 1 ? ' /' : ' / ' + myService.interval_count}{metricName && ` ${metricName} /`}{' '+myService.interval}</span>
             </span>
         );
     }else if (serType === "one_time"){
-        return (<span><Price value={myService.amount} currency={myService.currency}/></span>);
+        return (<span><Price value={myService.amount} currency={currency}/></span>);
     }else if (serType === "custom"){
         return false;
     } else{
-        return (<span><Price value={myService.amount} currency={myService.currency}/></span>)
+        return (<span><Price value={myService.amount} currency={currency}/></span>)
     }
 };
 /**
