@@ -1,5 +1,5 @@
 [[redirects]]
-  from = "public/js/"
-  to = "js/"
+  from = "/public/js/"
+  to = "/js/"
   status = 200
   force = true

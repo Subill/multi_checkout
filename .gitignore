@@ -7,7 +7,7 @@ yarn-error.log*
 .idea
 dist
 .idea/
-public/build
+public/js
 package-lock.json
 .npmrc
 # Runtime data
